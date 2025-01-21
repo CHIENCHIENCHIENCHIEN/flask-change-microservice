@@ -48,6 +48,34 @@ def change100route(dollar, cents):
     result = change(amount100)
     return jsonify(result)
 
+@app.route('/multiply_change', methods=['GET'])
+def multiply_change():
+    # Extract 'amount' from query parameters
+    amount = request.args.get('amount', type=float)
+    if amount is None:
+        return jsonify({"error": "Amount parameter is required"}), 400
+
+    # Multiply the amount by 100
+    multiplied_change = amount * 100
+
+    # Print a logging message
+    print(f"This is the {amount} X 100: {multiplied_change}")
+
+    # Return the result as JSON
+    return jsonify({"multiplied_change": multiplied_change})
+
+@app.route('/multiply_change_post', methods=['POST'])
+def multiply_change_post():
+    data = request.get_json()
+    if not data or 'amount' not in data:
+        return jsonify({"error": "JSON payload with 'amount' is required"}), 400
+
+    amount = float(data['amount'])
+    multiplied_change = amount * 100
+    print(f"This is the {amount} X 100: {multiplied_change}")
+    return jsonify({"multiplied_change": multiplied_change})
+
+
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
