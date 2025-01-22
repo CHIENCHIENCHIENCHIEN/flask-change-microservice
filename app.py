@@ -1,4 +1,31 @@
 from flask import Flask, jsonify, request
+import sqlite3
+
+DATABASE = 'change_history.db'
+
+def init_db():
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                amount REAL NOT NULL,
+                multiplied_change REAL NOT NULL,
+                change_breakdown TEXT NOT NULL
+            )
+        ''')
+        conn.commit()
+
+def log_change(user_id, amount, multiplied_change, change_breakdown):
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO history (user_id, amount, multiplied_change, change_breakdown)
+            VALUES (?, ?, ?, ?)
+        ''', (user_id, amount, multiplied_change, str(change_breakdown)))
+        conn.commit()
+
 
 app = Flask(__name__)
 
@@ -41,13 +68,16 @@ def change100route(dollar, cents):
 @app.route('/multiply_change', methods=['GET'])
 def multiply_change():
     amount = request.args.get('amount', type=float)
+    user_id = request.args.get('user_id', type=str, default='anonymous')
     if amount is None:
         return jsonify({"error": "Amount parameter is required"}), 400
 
     multiplied_change = amount * 100
-    print(f"This is the {amount} X 100: {multiplied_change}")
+    print(f"Multiplying the amount {amount} by 100: {multiplied_change}")
+    result = change(amount)  # Your existing function to calculate change
 
-    result = change(amount)  
+    log_change(user_id, amount, multiplied_change, result)
+
     return jsonify({"multiplied_change": multiplied_change, "change_breakdown": result})
 
 
@@ -66,5 +96,6 @@ def multiply_change_post():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run(host='127.0.0.1', port=8080, debug=True)
 
