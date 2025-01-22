@@ -47,7 +47,7 @@ def multiply_change():
     multiplied_change = amount * 100
     print(f"This is the {amount} X 100: {multiplied_change}")
 
-    result = change(amount)  # Calculate the change based on original amount
+    result = change(amount)  
     return jsonify({"multiplied_change": multiplied_change, "change_breakdown": result})
 
 
@@ -61,10 +61,10 @@ def multiply_change_post():
     multiplied_change = amount * 100
     print(f"This is the {amount} X 100: {multiplied_change}")
 
-    result = change(amount)  # Calculate the change based on original amount
+    result = change(amount)  
     return jsonify({"multiplied_change": multiplied_change, "change_breakdown": result})
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)
 
