@@ -26,6 +26,31 @@ def log_change(user_id, amount, multiplied_change, change_breakdown):
         ''', (user_id, amount, multiplied_change, str(change_breakdown)))
         conn.commit()
 
+def fetch_history(user_id):
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, amount, multiplied_change, change_breakdown 
+            FROM history 
+            WHERE user_id = ?
+        ''', (user_id,))
+        rows = cursor.fetchall()
+    return rows
+
+@app.route('/history', methods=['GET'])
+def get_history():
+    user_id = request.args.get('user_id', type=str, default='anonymous')
+    rows = fetch_history(user_id)
+    history = [
+        {
+            "id": row[0],
+            "amount": row[1],
+            "multiplied_change": row[2],
+            "change_breakdown": row[3],
+        }
+        for row in rows
+    ]
+    return jsonify({"user_id": user_id, "history": history})
 
 app = Flask(__name__)
 
@@ -74,7 +99,7 @@ def multiply_change():
 
     multiplied_change = amount * 100
     print(f"Multiplying the amount {amount} by 100: {multiplied_change}")
-    result = change(amount)  # Your existing function to calculate change
+    result = change(amount)  
 
     log_change(user_id, amount, multiplied_change, result)
 
