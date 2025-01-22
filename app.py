@@ -37,20 +37,7 @@ def fetch_history(user_id):
         rows = cursor.fetchall()
     return rows
 
-@app.route('/history', methods=['GET'])
-def get_history():
-    user_id = request.args.get('user_id', type=str, default='anonymous')
-    rows = fetch_history(user_id)
-    history = [
-        {
-            "id": row[0],
-            "amount": row[1],
-            "multiplied_change": row[2],
-            "change_breakdown": row[3],
-        }
-        for row in rows
-    ]
-    return jsonify({"user_id": user_id, "history": history})
+
 
 app = Flask(__name__)
 
@@ -119,6 +106,20 @@ def multiply_change_post():
     result = change(amount)  
     return jsonify({"multiplied_change": multiplied_change, "change_breakdown": result})
 
+@app.route('/history', methods=['GET'])
+def get_history():
+    user_id = request.args.get('user_id', type=str, default='anonymous')
+    rows = fetch_history(user_id)
+    history = [
+        {
+            "id": row[0],
+            "amount": row[1],
+            "multiplied_change": row[2],
+            "change_breakdown": row[3],
+        }
+        for row in rows
+    ]
+    return jsonify({"user_id": user_id, "history": history})
 
 if __name__ == '__main__':
     init_db()
